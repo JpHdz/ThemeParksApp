@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es-mx">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Parques Temáticos Mundial</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div id="main">
+      <div class="user-profile">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-info">
+          <div class="user-name">Bienvenido, Usuario</div>
+          <div class="logout-btn">Cerrar sesión</div>
+        </div>
+      </div>
+      <div id="sidebar">
+        <div class="header">
+          <div>
+            <div class="logo">
+              <div class="logo-icon">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ2xvYmVHcmFkaWVudCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmNTllMGIiIC8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDAlIiBzdG9wLWNvbG9yPSIjZjU5ZTBiIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOTdkMTYiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8ZyBmaWxsPSJ1cmwoI2dsb2JlR3JhZGllbnQpIj4KICAgIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjQwIiBmaWxsPSJub25lIiBzdHJva2U9InVybCgjZ2xvYmVHcmFkaWVudCkiIHN0cm9rZS13aWR0aD0iMiIgLz4KICAgIDxwYXRoIGQ9Ik01MCwxMCBBNDAsNDAgMCwwLDEgOTAsMTAgTDUwLDUwIFoiIGZpbGwtb3BhY2l0eT0iMC41IiAvPgogICAgPHBhdGggZD0iTTEwLDUwIEE0MCw0MCAwLDAsMSA1MCwxMCBMNTAsNTAgWiIgZmlsbC1vcGFjaXR5PSIwLjciIC8+CiAgICA8cGF0aCBkPSJNNTAsOTAgQTQwLDQwIDAsMCwxIDEwLDUwIEw1MCw1MCBaIiBmaWxsLW9wYWNpdHk9IjAuNSIgLz4KICAgIDxwYXRoIGQ9Ik05MCwxMCBBNDAsNDAgMCwwLDEgNTAsOTAgTDUwLDUwIFoiIGZpbGwtb3BhY2l0eT0iMC43IiAvPgogIDwvZz4KPC9zdmc+Cg=="
+                  alt="Parques Temáticos Mundial"
+                />
+              </div>
+              <span>Parques Temáticos Mundial</span>
+            </div>
+            <div class="nav-tabs">
+              <div class="nav-tab active" data-tab="parques">PARQUES</div>
+              <div class="nav-tab" data-tab="operaciones">OPERACIONES</div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-content" id="parquesContent">
+          <div class="sidebar-title">Áreas de parques temáticos</div>
+
+          <ul id="polygonList">
+            <!-- <div class="polygon-item">
+              <li class="selected">
+                <input type="checkbox" /><span>Polígono 1</span>
+              </li>
+            </div> -->
+          </ul>
+        </div>
+
+        <div
+          class="sidebar-content"
+          id="operacionesContent"
+          style="display: none"
+        >
+          <div class="sidebar-title">Operaciones</div>
+
+          <div class="sidebar-control-group">
+            <div class="control-icon"><i class="fas fa-sync-alt"></i></div>
+            <div class="control-content">
+              <div class="control-label">Ángulo de rotación (°):</div>
+              <div class="control-input">
+                <input id="rotateAngle" type="number" value="25" />
+              </div>
+
+              <div class="custom-checkbox">
+                <input type="checkbox" id="useCustomPivot" />
+                <label for="useCustomPivot">Usar punto personalizado</label>
+              </div>
+
+              <div class="coord-inputs">
+                <div class="coord-input">
+                  <label>Latitud:</label>
+                  <input
+                    id="pivotLat"
+                    type="number"
+                    step="0.0001"
+                    placeholder="Ej. 28.3852"
+                    value="28.3852"
+                  />
+                </div>
+                <div class="coord-input">
+                  <label>Longitud:</label>
+                  <input
+                    id="pivotLng"
+                    type="number"
+                    step="0.0001"
+                    placeholder="-81.5639"
+                    value="-81.5639"
+                  />
+                </div>
+              </div>
+
+              <button class="operation-btn" onclick="RotarPoligono()">
+                Rotar
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-control-group">
+            <div class="control-icon"><i class="fas fa-arrows-alt-h"></i></div>
+            <div class="control-content">
+              <div class="control-label">Distancia (km):</div>
+              <div class="control-input">
+                <input id="translateDistance" type="number" value="15" />
+              </div>
+
+              <div class="control-label">Dirección (°):</div>
+              <div class="control-input">
+                <input id="translateDirection" type="number" value="90" />
+              </div>
+
+              <button class="operation-btn" onclick="TrasladarPoligono()">
+                Trasladar
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-control-group">
+            <div class="control-icon"><i class="fas fa-search"></i></div>
+            <div class="control-content">
+              <div class="control-label">Factor de escala:</div>
+              <div class="control-input">
+                <input id="scaleFactor" type="number" step="0.1" value="1.2" />
+              </div>
+
+              <button class="operation-btn" onclick="EscalarPoligono()">
+                Escalar
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-operations-group">
+            <button
+              class="operation-btn wide-btn"
+              onclick="calcularInterseccion()"
+            >
+              Calcular Intersección
+            </button>
+            <button class="operation-btn wide-btn" onclick="calcularUnion()">
+              Calcular Unión
+            </button>
+
+            <div class="simplify-controls">
+              <div class="control-label">Tolerancia:</div>
+              <div class="control-input">
+                <input
+                  id="simplifyTolerance"
+                  type="number"
+                  step="0.001"
+                  value="0.005"
+                />
+              </div>
+              <button
+                class="operation-btn wide-btn"
+                onclick="simplificarPoligono()"
+              >
+                Simplificar Polígono
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="map"></div>
+
+      <div class="map-controls">
+        <div class="map-control-btn" id="zoomIn">+</div>
+        <div class="map-control-btn" id="zoomOut">−</div>
+      </div>
+
+      <div class="use-position-button">USE SU POSICIÓN</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.geometryutil/0.9.3/leaflet.geometryutil.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
