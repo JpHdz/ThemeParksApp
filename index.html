@@ -45,19 +45,40 @@
             </div>
             <div class="nav-tabs">
               <div class="nav-tab active" data-tab="parques">PARQUES</div>
+              <div class="nav-tab" data-tab="zonas">ZONAS</div>
               <div class="nav-tab" data-tab="operaciones">OPERACIONES</div>
             </div>
           </div>
         </div>
         <div class="sidebar-content" id="parquesContent">
-          <div class="sidebar-title">Áreas de parques temáticos</div>
+          <div class="sidebar-title">Parques temáticos</div>
 
-          <ul id="polygonList">
-            <!-- <div class="polygon-item">
-              <li class="selected">
-                <input type="checkbox" /><span>Polígono 1</span>
+          <ul id="pointsList">
+            <div class="point-item">
+              <li class="point-item">
+                <input type="checkbox" />
+                <div class="country-code">PT</div>
+                <div class="point-item-content">
+                  <div class="point-name">Lisboa</div>
+                  <div class="point-date">Octubre 31, 2024</div>
+                </div>
+                <div class="remove-btn">×</div>
               </li>
-            </div> -->
+            </div>
+          </ul>
+        </div>
+        <div
+          class="sidebar-zones sidebar-content"
+          id="zonesContent"
+          style="display: none"
+        >
+          <div class="sidebar-title">Áreas de parques temáticos</div>
+          <ul id="polygonList">
+            <li class="polygon-item">
+              <input type="checkbox" />
+              <span class="polygon-name">Polígono 1</span>
+              <div class="remove-btn">×</div>
+            </li>
           </ul>
         </div>
 
@@ -69,9 +90,11 @@
           <div class="sidebar-title">Operaciones</div>
 
           <div class="sidebar-control-group">
-            <div class="control-icon"><i class="fas fa-sync-alt"></i></div>
             <div class="control-content">
-              <div class="control-label">Ángulo de rotación (°):</div>
+              <div class="control-label flex-group">
+                <p>Ángulo de rotación (°):</p>
+                <div class="control-icon"><i class="fas fa-sync-alt"></i></div>
+              </div>
               <div class="control-input">
                 <input id="rotateAngle" type="number" value="25" />
               </div>
@@ -111,9 +134,13 @@
           </div>
 
           <div class="sidebar-control-group">
-            <div class="control-icon"><i class="fas fa-arrows-alt-h"></i></div>
             <div class="control-content">
-              <div class="control-label">Distancia (km):</div>
+              <div class="control-label flex-group">
+                <p>Distancia (km):</p>
+                <div class="control-icon flex-group">
+                  <i class="fas fa-arrows-alt-h"></i>
+                </div>
+              </div>
               <div class="control-input">
                 <input id="translateDistance" type="number" value="15" />
               </div>
@@ -130,9 +157,11 @@
           </div>
 
           <div class="sidebar-control-group">
-            <div class="control-icon"><i class="fas fa-search"></i></div>
             <div class="control-content">
-              <div class="control-label">Factor de escala:</div>
+              <div class="control-label flex-group">
+                <p>Factor de escala:</p>
+                <div class="control-icon"><i class="fas fa-search"></i></div>
+              </div>
               <div class="control-input">
                 <input id="scaleFactor" type="number" step="0.1" value="1.2" />
               </div>

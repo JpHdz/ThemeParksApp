@@ -37,6 +37,11 @@ body {
   position: fixed;
   width: 100%;
 }
+.flex-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
 .logo {
   display: flex;
@@ -283,7 +288,7 @@ h1 {
   overflow: scroll;
 }
 
-#polygonList {
+/* #polygonList {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -306,6 +311,90 @@ h1 {
 
 .polygon-item:hover {
   background-color: var(--list-item-hover);
+} */
+
+#polygonList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#polygonList li {
+  cursor: pointer;
+  padding: 12px 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.polygon-item input[type="checkbox"] {
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.polygon-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.polygon-item:hover {
+  background-color: var(--list-item-hover);
+}
+
+.remove-btn {
+  margin-left: auto;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 20px;
+}
+.country-code {
+  width: 30px;
+  height: 30px;
+  background-color: #334155;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+#pointsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#pointsList li {
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.point-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.point-item:hover {
+  background-color: var(--list-item-hover);
+}
+
+.point-item input[type="checkbox"] {
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .country-code {
@@ -323,35 +412,32 @@ h1 {
   flex-shrink: 0;
 }
 
-.polygon-item-content {
+.point-item-content {
   flex: 1;
 }
 
-.polygon-name {
+.point-name {
   font-weight: 500;
   margin-bottom: 4px;
 }
 
-.polygon-date {
+.point-date {
   font-size: 0.8rem;
   color: #94a3b8;
 }
 
-.remove-btn {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.point-item-content {
+  flex: 1;
+}
+
+.point-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.point-date {
   font-size: 0.8rem;
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  color: #94a3b8;
 }
 
 .remove-btn:hover {

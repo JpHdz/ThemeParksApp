@@ -47,6 +47,9 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("parquesContent").style.display = "block";
       } else if (tabName === "operaciones") {
         document.getElementById("operacionesContent").style.display = "block";
+      } else if (tabName === "zonas") {
+        document.getElementById("zonesContent").style.display = "block";
+        console.log(tabName);
       }
     });
   });
