@@ -1,0 +1,78 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Tabla de parques temáticos
+CREATE TABLE lugares (
+  id SERIAL PRIMARY KEY,
+  nombre TEXT,
+  latitud DOUBLE PRECISION,
+  longitud DOUBLE PRECISION,
+  ubicacion GEOMETRY(Point, 4326),
+  costo_entrada NUMERIC,
+  propietario TEXT,
+  calificacion NUMERIC
+);
+
+-- Tabla de zonas
+CREATE TABLE zonas (
+  id SERIAL PRIMARY KEY,
+  nombre TEXT,
+  ubicacion GEOMETRY(Polygon, 4326),
+  area NUMERIC,
+  perimetro NUMERIC,
+  num_parques INTEGER
+);
+
+-- Inserción de parques temáticos
+INSERT INTO lugares (nombre, latitud, longitud, ubicacion, costo_entrada, propietario, calificacion) VALUES
+  ('Magic Kingdom', 28.4177, -81.5812, ST_SetSRID(ST_MakePoint(-81.5812, 28.4177), 4326), 109.00, 'Disney', 4.9),
+  ('Disneyland Park', 33.8121, -117.9190, ST_SetSRID(ST_MakePoint(-117.9190, 33.8121), 4326), 104.00, 'Disney', 4.8),
+  ('Universal Studios Japan', 34.6654, 135.4323, ST_SetSRID(ST_MakePoint(135.4323, 34.6654), 4326), 78.00, 'Universal', 4.8),
+  ('Tokyo Disneyland', 35.6329, 139.8804, ST_SetSRID(ST_MakePoint(139.8804, 35.6329), 4326), 75.00, 'Disney', 4.9),
+  ('Shanghai Disneyland', 31.1434, 121.6570, ST_SetSRID(ST_MakePoint(121.6570, 31.1434), 4326), 76.00, 'Disney', 4.7),
+  ('Chimelong Ocean Kingdom', 22.1056, 113.5650, ST_SetSRID(ST_MakePoint(113.5650, 22.1056), 4326), 65.00, 'Chimelong', 4.6),
+  ('Tokyo DisneySea', 35.6264, 139.8854, ST_SetSRID(ST_MakePoint(139.8854, 35.6264), 4326), 75.00, 'Disney', 4.9),
+  ('EPCOT', 28.3747, -81.5494, ST_SetSRID(ST_MakePoint(-81.5494, 28.3747), 4326), 109.00, 'Disney', 4.7),
+  ('Disneyland Paris', 48.8674, 2.7833, ST_SetSRID(ST_MakePoint(2.7833, 48.8674), 4326), 89.00, 'Disney', 4.6),
+  ('Disneys Hollywood Studios', 28.3575, -81.5580, ST_SetSRID(ST_MakePoint(-81.5580, 28.3575), 4326), 109.00, 'Disney', 4.5),
+  ('Alton Towers Resort', 52.9870, -1.8854, ST_SetSRID(ST_MakePoint(-1.8854, 52.9870), 4326), 60.00, 'Merlin', 4.4),
+  ('LEGOLAND Billund', 55.7358, 9.1293, ST_SetSRID(ST_MakePoint(9.1293, 55.7358), 4326), 55.00, 'Merlin', 4.5),
+  ('Happy Valley Beijing', 39.8730, 116.4970, ST_SetSRID(ST_MakePoint(116.4970, 39.8730), 4326), 50.00, 'OCT', 4.3),
+  ('PortAventura Park', 41.0870, 1.1571, ST_SetSRID(ST_MakePoint(1.1571, 41.0870), 4326), 60.00, 'Investindustrial', 4.6),
+  ('SeaWorld Orlando', 28.4115, -81.4620, ST_SetSRID(ST_MakePoint(-81.4620, 28.4115), 4326), 85.00, 'SeaWorld Parks', 4.4),
+  ('Universal Studios Florida', 28.4720, -81.4678, ST_SetSRID(ST_MakePoint(-81.4678, 28.4720), 4326), 109.00, 'Universal', 4.7),
+  ('Lotte World', 37.5110, 127.0980, ST_SetSRID(ST_MakePoint(127.0980, 37.5110), 4326), 55.00, 'Lotte', 4.5),
+  ('Europa-Park', 48.2670, 7.7220, ST_SetSRID(ST_MakePoint(7.7220, 48.2670), 4326), 60.00, 'Mack', 4.8),
+  ('Beto Carrero World', -26.8020, -48.6110, ST_SetSRID(ST_MakePoint(-48.6110, -26.8020), 4326), 40.00, 'Privado', 4.6),
+  ('Gardaland', 45.4560, 10.7190, ST_SetSRID(ST_MakePoint(10.7190, 45.4560), 4326), 50.00, 'Merlin', 4.5),
+  ('Phantasialand', 50.8000, 6.8790, ST_SetSRID(ST_MakePoint(6.8790, 50.8000), 4326), 55.00, 'Privado', 4.7),
+  ('Ocean Park Hong Kong', 22.2470, 114.1750, ST_SetSRID(ST_MakePoint(114.1750, 22.2470), 4326), 60.00, 'Privado', 4.4),
+  ('Tivoli Gardens', 55.6736, 12.5681, ST_SetSRID(ST_MakePoint(12.5681, 55.6736), 4326), 20.00, 'Privado', 4.6),
+  ('Six Flags Magic Mountain', 34.4258, -118.5951, ST_SetSRID(ST_MakePoint(-118.5951, 34.4258), 4326), 85.00, 'Six Flags', 4.5),
+  ('Busch Gardens Tampa Bay', 28.0370, -82.4190, ST_SetSRID(ST_MakePoint(-82.4190, 28.0370), 4326), 90.00, 'SeaWorld Parks', 4.4),
+  ('Everland', 37.2940, 127.2020, ST_SetSRID(ST_MakePoint(127.2020, 37.2940), 4326), 50.00, 'Samsung', 4.5),
+  ('Universal Studios Singapore', 1.2540, 103.8230, ST_SetSRID(ST_MakePoint(103.8230, 1.2540), 4326), 75.00, 'Universal', 4.6),
+  ('Ferrari World Abu Dhabi', 24.4790, 54.6060, ST_SetSRID(ST_MakePoint(54.6060, 24.4790), 4326), 80.00, 'Aldar', 4.4),
+  ('Xcaret Park', 20.5800, -87.1200, ST_SetSRID(ST_MakePoint(-87.1200, 20.5800), 4326), 110.00, 'Grupo Xcaret', 4.8),
+  ('Parque de Atracciones de Madrid', 40.4030, -3.7450, ST_SetSRID(ST_MakePoint(-3.7450, 40.4030), 4326), 35.00, 'Parques Reunidos', 4.2),
+  ('Liseberg', 57.6950, 11.9930, ST_SetSRID(ST_MakePoint(11.9930, 57.6950), 4326), 45.00, 'Privado', 4.5);
+
+  INSERT INTO zonas (nombre, ubicacion, area, perimetro, num_parques) VALUES
+  ('Zona A', ST_GeomFromText('POLYGON((-99.14 19.43, -99.13 19.43, -99.13 19.44, -99.14 19.44, -99.14 19.43))', 4326), 1.0, 0.4, 2),
+  ('Zona B', ST_GeomFromText('POLYGON((-118.27 34.05, -118.26 34.05, -118.26 34.06, -118.27 34.06, -118.27 34.05))', 4326), 1.2, 0.5, 3),
+  ('Zona C', ST_GeomFromText('POLYGON((2.78 48.86, 2.79 48.86, 2.79 48.87, 2.78 48.87, 2.78 48.86))', 4326), 0.8, 0.3, 1),
+  ('Zona D', ST_GeomFromText('POLYGON((135.43 34.66, 135.44 34.66, 135.44 34.67, 135.43 34.67, 135.43 34.66))', 4326), 0.9, 0.35, 1),
+  ('Zona E', ST_GeomFromText('POLYGON((121.65 31.14, 121.66 31.14, 121.66 31.15, 121.65 31.15, 121.65 31.14))', 4326), 1.1, 0.45, 1),
+  ('Zona F', ST_GeomFromText('POLYGON((7.72 48.26, 7.73 48.26, 7.73 48.27, 7.72 48.27, 7.72 48.26))', 4326), 0.9, 0.4, 2),
+  ('Zona G', ST_GeomFromText('POLYGON((127.20 37.29, 127.21 37.29, 127.21 37.30, 127.20 37.30, 127.20 37.29))', 4326), 1.1, 0.45, 1),
+  ('Zona H', ST_GeomFromText('POLYGON((54.60 24.47, 54.61 24.47, 54.61 24.48, 54.60 24.48, 54.60 24.47))', 4326), 1.3, 0.5, 1),
+  ('Zona I', ST_GeomFromText('POLYGON((-3.75 40.40, -3.74 40.40, -3.74 40.41, -3.75 40.41, -3.75 40.40))', 4326), 0.95, 0.38, 1),
+  ('Zona J', ST_GeomFromText('POLYGON((10.71 45.45, 10.72 45.45, 10.72 45.46, 10.71 45.46, 10.71 45.45))', 4326), 0.85, 0.36, 1);
+
+-- Calcular área y perímetro en metros
+UPDATE zonas
+SET area = ST_Area(ST_Transform(ubicacion, 3857)),
+    perimetro = ST_Perimeter(ST_Transform(ubicacion, 3857));
+
+
+
+

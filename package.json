@@ -8,11 +8,20 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "nodemon": "^3.1.10",
     "pg": "^8.15.6"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JpHdz/ThemeParksApp.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/JpHdz/ThemeParksApp/issues"
+  },
+  "homepage": "https://github.com/JpHdz/ThemeParksApp#readme",
+  "description": ""
 }
