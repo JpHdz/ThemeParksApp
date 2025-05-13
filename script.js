@@ -55,11 +55,312 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-var map = L.map("map").setView([23.6345, -102.5528], 5);
+// var map = L.map("map").setView([23.6345, -102.5528], 5);
 
+// L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+//   attribution: "&copy; OpenStreetMap contributors",
+// }).addTo(map);
+
+// Variables para almacenar capas de datos
+let parquesLayer = L.layerGroup();
+let atraccionesLayer = L.layerGroup();
+
+// Inicializar el mapa (asumiendo que esto ya lo tienes implementado)
+let map = L.map("map").setView([40.416775, -3.70379], 6); // Vista inicial en España
+
+// Agregar capa base de OpenStreetMap
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
+  attribution:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
+
+// Cargar los parques desde el API
+function cargarParques() {
+  fetch("http://localhost:3000/parques")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Datos de parques recibidos:", data);
+      // Limpiar capa existente
+      parquesLayer.clearLayers();
+
+      // Crear lista para el sidebar
+      const pointsList = document.getElementById("pointsList");
+      pointsList.innerHTML = ""; // Limpiar lista existente
+
+      // Agregar cada parque al mapa
+      data.features.forEach((feature) => {
+        const parque = feature.properties;
+        const geom = feature.geometry;
+
+        // Crear polígono y agregarlo al mapa
+        const polygon = L.geoJSON(geom, {
+          style: {
+            fillColor: "#f59e0b",
+            weight: 2,
+            opacity: 0.7,
+            color: "#f97d16",
+            fillOpacity: 0.4,
+          },
+        }).addTo(parquesLayer);
+
+        // Agregar popup con información
+        polygon.bindPopup(`
+          <div class="popup-content">
+            <h3>${parque.nombre}</h3>
+            <p><strong>Operado por:</strong> ${parque.empresa_operadora}</p>
+            <p><strong>Inauguración:</strong> ${parque.fecha_inauguracion}</p>
+            <p><strong>Superficie:</strong> ${parque.superficie_hectareas} hectáreas</p>
+            <p><strong>Capacidad:</strong> ${parque.capacidad_maxima} personas</p>
+            <p><strong>Horario:</strong> ${parque.horario_apertura} - ${parque.horario_cierre}</p>
+            <p><strong>Ubicación:</strong> ${parque.ciudad}, ${parque.pais}</p>
+          </div>
+        `);
+
+        // Agregar elemento a la lista del sidebar
+        const listItem = document.createElement("li");
+        listItem.className = "point-item";
+        listItem.innerHTML = `
+          <input type="checkbox" checked />
+          <div class="country-code">${parque.pais
+            .substring(0, 2)
+            .toUpperCase()}</div>
+          <div class="point-item-content">
+            <div class="point-name">${parque.nombre}</div>
+            <div class="point-date">${parque.fecha_inauguracion}</div>
+          </div>
+          <div class="remove-btn">×</div>
+        `;
+        pointsList.appendChild(listItem);
+
+        // Manejar evento de clic en checkbox
+        const checkbox = listItem.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener("change", function () {
+          if (this.checked) {
+            map.addLayer(polygon);
+          } else {
+            map.removeLayer(polygon);
+          }
+        });
+
+        // Manejar evento de clic en botón de eliminar
+        const removeBtn = listItem.querySelector(".remove-btn");
+        removeBtn.addEventListener("click", function () {
+          map.removeLayer(polygon);
+          pointsList.removeChild(listItem);
+        });
+      });
+
+      // Agregar capa al mapa
+      parquesLayer.addTo(map);
+
+      // Ajustar la vista del mapa para mostrar todos los parques
+      if (data.features.length > 0) {
+        const bounds = parquesLayer.getBounds();
+        map.fitBounds(bounds);
+      }
+    })
+    .catch((error) => {
+      console.error("Error al cargar los parques:", error);
+      alert(
+        "Error al cargar los datos de parques temáticos. Por favor, verifica la conexión con el servidor."
+      );
+    });
+}
+
+// Cargar las atracciones desde el API
+function cargarAtracciones() {
+  fetch("http://localhost:3000/atracciones")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Datos de atracciones recibidos:", data);
+      // Limpiar capa existente
+      atraccionesLayer.clearLayers();
+
+      // Crear lista para el sidebar
+      const polygonList = document.getElementById("polygonList");
+      polygonList.innerHTML = ""; // Limpiar lista existente
+
+      // Iconos por tipo de atracción
+      const iconos = {
+        "Montaña rusa": "fa-rocket",
+        Acuática: "fa-water",
+        Familiar: "fa-users",
+        Espectáculo: "fa-theater-masks",
+        Extrema: "fa-bolt",
+        default: "fa-star",
+      };
+
+      // Colores por intensidad
+      const colores = {
+        Baja: "#4ade80", // verde
+        Media: "#fbbf24", // amarillo
+        Alta: "#ef4444", // rojo
+        default: "#8b5cf6", // morado
+      };
+
+      // Agregar cada atracción al mapa
+      data.features.forEach((feature) => {
+        const atraccion = feature.properties;
+        const geom = feature.geometry;
+
+        // Determinar icono y color
+        const iconClass = iconos[atraccion.tipo] || iconos["default"];
+        const color = colores[atraccion.intensidad] || colores["default"];
+
+        // Crear marcador personalizado
+        const iconHtml = `<i class="fas ${iconClass}" style="color: ${color};"></i>`;
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: "custom-div-icon",
+          iconSize: [30, 30],
+          iconAnchor: [15, 15],
+        });
+
+        // Crear marcador y agregarlo al mapa
+        const marker = L.marker([geom.coordinates[1], geom.coordinates[0]], {
+          icon: customIcon,
+        }).addTo(atraccionesLayer);
+
+        // Agregar popup con información
+        marker.bindPopup(`
+          <div class="popup-content">
+            <h3>${atraccion.nombre}</h3>
+            <p><strong>Tipo:</strong> ${atraccion.tipo}</p>
+            <p><strong>Intensidad:</strong> ${atraccion.intensidad}</p>
+            <p><strong>Altura mínima:</strong> ${atraccion.altura_minima} cm</p>
+            <p><strong>Capacidad:</strong> ${atraccion.capacidad_personas} personas</p>
+            <p><strong>Duración:</strong> ${atraccion.duracion_minutos} minutos</p>
+            <p><strong>Fabricante:</strong> ${atraccion.fabricante}</p>
+            <p><strong>Estado:</strong> ${atraccion.estado}</p>
+            <p><strong>Parque:</strong> ${atraccion.nombre_parque}</p>
+          </div>
+        `);
+
+        // Agregar elemento a la lista del sidebar
+        const listItem = document.createElement("li");
+        listItem.className = "polygon-item";
+        listItem.innerHTML = `
+          <input type="checkbox" checked />
+          <span class="polygon-name">${atraccion.nombre}</span>
+          <div class="remove-btn">×</div>
+        `;
+        polygonList.appendChild(listItem);
+
+        // Manejar evento de clic en checkbox
+        const checkbox = listItem.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener("change", function () {
+          if (this.checked) {
+            map.addLayer(marker);
+          } else {
+            map.removeLayer(marker);
+          }
+        });
+
+        // Manejar evento de clic en botón de eliminar
+        const removeBtn = listItem.querySelector(".remove-btn");
+        removeBtn.addEventListener("click", function () {
+          map.removeLayer(marker);
+          polygonList.removeChild(listItem);
+        });
+      });
+
+      // Agregar capa al mapa
+      atraccionesLayer.addTo(map);
+    })
+    .catch((error) => {
+      console.error("Error al cargar las atracciones:", error);
+      alert(
+        "Error al cargar los datos de atracciones. Por favor, verifica la conexión con el servidor."
+      );
+    });
+}
+
+// Funcionalidad para los tabs del sidebar
+function setupTabs() {
+  const tabs = document.querySelectorAll(".nav-tab");
+  const contents = {
+    parques: document.getElementById("parquesContent"),
+    zonas: document.getElementById("zonesContent"),
+    operaciones: document.getElementById("operacionesContent"),
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      // Desactivar todos los tabs
+      tabs.forEach((t) => t.classList.remove("active"));
+      // Ocultar todos los contenidos
+      Object.values(contents).forEach((content) => {
+        content.style.display = "none";
+      });
+
+      // Activar el tab seleccionado
+      tab.classList.add("active");
+      // Mostrar el contenido correspondiente
+      const contentId = tab.getAttribute("data-tab");
+      contents[contentId].style.display = "block";
+    });
+  });
+}
+
+// Función para agregar controles de zoom
+function setupMapControls() {
+  document.getElementById("zoomIn").addEventListener("click", () => {
+    map.zoomIn();
+  });
+
+  document.getElementById("zoomOut").addEventListener("click", () => {
+    map.zoomOut();
+  });
+
+  // Botón para usar la posición actual
+  document
+    .querySelector(".use-position-button")
+    .addEventListener("click", () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            map.setView([lat, lng], 13);
+            // Opcional: mostrar un marcador en la posición actual
+            L.marker([lat, lng])
+              .addTo(map)
+              .bindPopup("Tu ubicación actual")
+              .openPopup();
+          },
+          (error) => {
+            console.error("Error al obtener la ubicación:", error);
+            alert("No se pudo obtener tu ubicación actual.");
+          }
+        );
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+    });
+}
+
+// Inicializar la aplicación cuando se carga la página
+document.addEventListener("DOMContentLoaded", () => {
+  // Configurar los tabs
+  setupTabs();
+
+  // Configurar controles del mapa
+  setupMapControls();
+
+  // Cargar datos
+  cargarParques();
+  cargarAtracciones();
+});
 
 var drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
