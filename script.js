@@ -126,7 +126,6 @@ function cargarParques() {
         const listItem = document.createElement("li");
         listItem.className = "polygon-item";
         listItem.innerHTML = `
-          <input type="checkbox"  />
           <div class="country-code">${parque.pais
             .substring(0, 2)
             .toUpperCase()}</div>
@@ -142,21 +141,23 @@ function cargarParques() {
         listaPoligonos.push(polygon);
         listItem.dataset.polygonIndex = listaPoligonos.length - 1;
 
-        // Manejar evento de clic en checkbox
-        const checkbox = listItem.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener("change", function () {
-          if (this.checked) {
-            map.addLayer(polygon);
-          } else {
-            map.removeLayer(polygon);
-          }
-        });
-
         // Manejar evento de clic en botón de eliminar
         const removeBtn = listItem.querySelector(".remove-btn");
-        removeBtn.addEventListener("click", function () {
+        removeBtn.addEventListener("click", function (e) {
+          e.stopPropagation(); // Evitar que el evento se propague al elemento padre
           map.removeLayer(polygon);
           polygonList.removeChild(listItem);
+
+          // Eliminar de la lista de polígonos
+          const index = listaPoligonos.indexOf(polygon);
+          if (index > -1) {
+            listaPoligonos.splice(index, 1);
+          }
+
+          // Eliminar de los seleccionados si está seleccionado
+          if (poligonosSeleccionados.has(polygon)) {
+            poligonosSeleccionados.delete(polygon);
+          }
         });
 
         // Manejar evento de clic en el elemento de lista
@@ -174,6 +175,9 @@ function cargarParques() {
           poligonosSeleccionados.clear();
           poligonosSeleccionados.add(polygon);
           polygon.setStyle(colorSeleccionado);
+
+          // Centrar el mapa en este polígono
+          map.fitBounds(polygon.getBounds());
         });
       });
 
@@ -272,8 +276,7 @@ function cargarAtracciones() {
         const listItem = document.createElement("li");
         listItem.className = "point-item";
         listItem.innerHTML = `
-          <input type="checkbox"  />
-        
+          <div class="point-icon"><i class="fas ${iconClass}" style="color: ${color};"></i></div>
           <div class="point-item-content">
             <div class="point-name">${atraccion.nombre}</div>
             <div class="point-type">${atraccion.tipo} - ${atraccion.intensidad}</div>
@@ -281,16 +284,6 @@ function cargarAtracciones() {
           <div class="remove-btn">×</div>
         `;
         pointsList.appendChild(listItem);
-
-        // Manejar evento de clic en checkbox
-        const checkbox = listItem.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener("change", function () {
-          if (this.checked) {
-            map.addLayer(marker);
-          } else {
-            map.removeLayer(marker);
-          }
-        });
 
         // Manejar evento de clic en botón de eliminar
         const removeBtn = listItem.querySelector(".remove-btn");
@@ -585,6 +578,7 @@ function agregarResultado(geojson, titulo) {
   }
 }
 
+// Función de rotación corregida
 function RotarPoligono() {
   if (poligonosSeleccionados.size === 0) {
     alert("Selecciona al menos un polígono primero.");
@@ -631,6 +625,28 @@ function RotarPoligono() {
 
   actualizarLista();
 }
+
+// Agregar el evento para el botón de rotación
+document.addEventListener("DOMContentLoaded", function () {
+  // Asegurarse de que el botón existe antes de agregar el evento
+  const rotateButton = document.getElementById("rotateButton");
+  if (rotateButton) {
+    rotateButton.addEventListener("click", RotarPoligono);
+  } else {
+    console.error("El botón de rotación no existe en el DOM");
+  }
+
+  // También agrega los otros botones de transformación
+  const translateButton = document.getElementById("translateButton");
+  if (translateButton) {
+    translateButton.addEventListener("click", TrasladarPoligono);
+  }
+
+  const scaleButton = document.getElementById("scaleButton");
+  if (scaleButton) {
+    scaleButton.addEventListener("click", EscalarPoligono);
+  }
+});
 
 listItem.addEventListener("click", function () {
   // Obtener el índice del polígono correspondiente a este elemento
