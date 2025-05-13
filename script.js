@@ -50,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (tabName === "zonas") {
         document.getElementById("zonesContent").style.display = "block";
         console.log(tabName);
+      } else if (tabName === "analisis") {
+        document.getElementById("analisisContent").style.display = "block";
       }
     });
   });
@@ -74,7 +76,6 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-// Cargar los parques desde el API
 function cargarParques() {
   fetch("http://localhost:3000/parques")
     .then((response) => {
@@ -89,8 +90,8 @@ function cargarParques() {
       parquesLayer.clearLayers();
 
       // Crear lista para el sidebar
-      const pointsList = document.getElementById("pointsList");
-      pointsList.innerHTML = ""; // Limpiar lista existente
+      const polygonList = document.getElementById("polygonList");
+      polygonList.innerHTML = ""; // Limpiar lista existente
 
       // Agregar cada parque al mapa
       data.features.forEach((feature) => {
@@ -123,9 +124,9 @@ function cargarParques() {
 
         // Agregar elemento a la lista del sidebar
         const listItem = document.createElement("li");
-        listItem.className = "point-item";
+        listItem.className = "polygon-item";
         listItem.innerHTML = `
-          <input type="checkbox" checked />
+          <input type="checkbox"  />
           <div class="country-code">${parque.pais
             .substring(0, 2)
             .toUpperCase()}</div>
@@ -135,7 +136,11 @@ function cargarParques() {
           </div>
           <div class="remove-btn">×</div>
         `;
-        pointsList.appendChild(listItem);
+        polygonList.appendChild(listItem);
+
+        // Añadir polígono a la lista de polígonos
+        listaPoligonos.push(polygon);
+        listItem.dataset.polygonIndex = listaPoligonos.length - 1;
 
         // Manejar evento de clic en checkbox
         const checkbox = listItem.querySelector('input[type="checkbox"]');
@@ -151,7 +156,24 @@ function cargarParques() {
         const removeBtn = listItem.querySelector(".remove-btn");
         removeBtn.addEventListener("click", function () {
           map.removeLayer(polygon);
-          pointsList.removeChild(listItem);
+          polygonList.removeChild(listItem);
+        });
+
+        // Manejar evento de clic en el elemento de lista
+        listItem.addEventListener("click", function () {
+          // Deseleccionar elementos previos en la UI
+          document
+            .querySelectorAll(".polygon-item")
+            .forEach((i) => i.classList.remove("selected"));
+          this.classList.add("selected");
+
+          // Actualizar el conjunto poligonosSeleccionados
+          poligonosSeleccionados.forEach((p) =>
+            p.setStyle(colorNoSeleccionado)
+          );
+          poligonosSeleccionados.clear();
+          poligonosSeleccionados.add(polygon);
+          polygon.setStyle(colorSeleccionado);
         });
       });
 
@@ -187,8 +209,8 @@ function cargarAtracciones() {
       atraccionesLayer.clearLayers();
 
       // Crear lista para el sidebar
-      const polygonList = document.getElementById("polygonList");
-      polygonList.innerHTML = ""; // Limpiar lista existente
+      const pointsList = document.getElementById("pointsList");
+      pointsList.innerHTML = ""; // Limpiar lista existente
 
       // Iconos por tipo de atracción
       const iconos = {
@@ -248,13 +270,17 @@ function cargarAtracciones() {
 
         // Agregar elemento a la lista del sidebar
         const listItem = document.createElement("li");
-        listItem.className = "polygon-item";
+        listItem.className = "point-item";
         listItem.innerHTML = `
-          <input type="checkbox" checked />
-          <span class="polygon-name">${atraccion.nombre}</span>
+          <input type="checkbox"  />
+        
+          <div class="point-item-content">
+            <div class="point-name">${atraccion.nombre}</div>
+            <div class="point-type">${atraccion.tipo} - ${atraccion.intensidad}</div>
+          </div>
           <div class="remove-btn">×</div>
         `;
-        polygonList.appendChild(listItem);
+        pointsList.appendChild(listItem);
 
         // Manejar evento de clic en checkbox
         const checkbox = listItem.querySelector('input[type="checkbox"]');
@@ -270,7 +296,20 @@ function cargarAtracciones() {
         const removeBtn = listItem.querySelector(".remove-btn");
         removeBtn.addEventListener("click", function () {
           map.removeLayer(marker);
-          polygonList.removeChild(listItem);
+          pointsList.removeChild(listItem);
+        });
+
+        // Manejar evento de clic en el elemento de lista
+        listItem.addEventListener("click", function () {
+          // Deseleccionar elementos previos en la UI
+          document
+            .querySelectorAll(".point-item")
+            .forEach((i) => i.classList.remove("selected"));
+          this.classList.add("selected");
+
+          // Centrar el mapa en esta atracción
+          map.setView([geom.coordinates[1], geom.coordinates[0]], 18);
+          marker.openPopup();
         });
       });
 
@@ -284,7 +323,6 @@ function cargarAtracciones() {
       );
     });
 }
-
 // Funcionalidad para los tabs del sidebar
 function setupTabs() {
   const tabs = document.querySelectorAll(".nav-tab");
@@ -593,6 +631,30 @@ function RotarPoligono() {
 
   actualizarLista();
 }
+
+listItem.addEventListener("click", function () {
+  // Obtener el índice del polígono correspondiente a este elemento
+  const index = listaPoligonos.indexOf(polygon);
+
+  // Si no está seleccionado, seleccionarlo
+  if (!poligonosSeleccionados.has(listaPoligonos[index])) {
+    // Opcional: deseleccionar otros primero si no quieres selección múltiple
+    poligonosSeleccionados.forEach((p) => {
+      p.setStyle(colorNoSeleccionado);
+    });
+    poligonosSeleccionados.clear();
+
+    // Seleccionar este polígono
+    poligonosSeleccionados.add(listaPoligonos[index]);
+    listaPoligonos[index].setStyle(colorSeleccionado);
+  }
+
+  // Actualizar la apariencia en el sidebar
+  document
+    .querySelectorAll(".point-item")
+    .forEach((el) => el.classList.remove("selected"));
+  this.classList.add("selected");
+});
 
 function TrasladarPoligono() {
   if (poligonosSeleccionados.size === 0) {
