@@ -769,3 +769,112 @@ input:focus {
     transform: translateY(-10px);
   }
 }
+
+.active-mode {
+  background-color: #f59e0b !important;
+  color: white !important;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.7);
+}
+
+.buffer-selected {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-left: 3px solid #f59e0b;
+}
+
+.operation-btn {
+  transition: all 0.3s ease;
+}
+
+.operation-btn:hover {
+  background-color: #f97d16;
+  color: white;
+}
+
+.result-box {
+  background-color: #f3f4f6;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  border-left: 3px solid #f59e0b;
+}
+
+#map {
+  transition: cursor 0.2s ease;
+}
+
+/* Estilos para medición de distancias */
+.measure-point-marker {
+  background-color: #f97d16;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.measure-marker-container {
+  background: none !important;
+  border: none !important;
+}
+
+.distance-label {
+  background-color: rgba(249, 125, 22, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  white-space: nowrap;
+  font-size: 12px;
+  text-align: center;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.distance-label-container {
+  background: none !important;
+  border: none !important;
+}
+
+.clickable-for-measure {
+  cursor: pointer;
+  position: relative;
+}
+
+.clickable-for-measure::after {
+  content: "📏";
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+}
+
+.measure-selected {
+  background-color: rgba(249, 125, 22, 0.2);
+  border-left: 3px solid #f97d16;
+}
+
+/* Animación para la línea de medición */
+@keyframes dash {
+  to {
+    stroke-dashoffset: 20;
+  }
+}
+
+.leaflet-interactive {
+  transition: stroke-width 0.2s ease;
+}
+
+/* Ajustes para el panel de resultado */
+#distanceResult {
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #1e293b;
+}
