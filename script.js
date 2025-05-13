@@ -2220,3 +2220,325 @@ toggleSeleccion = function (poligono) {
     ).innerHTML = `${conteo} polígonos seleccionados. Presiona "Calcular Intersección"`;
   }
 };
+
+// Variables globales para filtrado
+let todasLasAtracciones = []; // Almacena todas las atracciones sin filtrar
+let filtrosActivos = {
+  tipo: "",
+  intensidad: "",
+  capacidadMin: 0,
+  alturaMinima: 0,
+  estados: ["Operativa", "Mantenimiento", "Cerrada temporalmente"],
+  parque: "",
+};
+
+// Función para inicializar los filtros
+function inicializarFiltros() {
+  // Evento para el slider de altura mínima
+  const sliderAltura = document.getElementById("filtroAlturaSlider");
+  const alturaValorDisplay = document.getElementById("alturaValor");
+
+  if (sliderAltura && alturaValorDisplay) {
+    sliderAltura.addEventListener("input", function () {
+      alturaValorDisplay.textContent = `${this.value} cm`;
+      filtrosActivos.alturaMinima = parseInt(this.value);
+    });
+  }
+
+  // Manejar cambios en los filtros de tipo y intensidad
+  document
+    .getElementById("filtroTipo")
+    ?.addEventListener("change", function () {
+      filtrosActivos.tipo = this.value;
+    });
+
+  document
+    .getElementById("filtroIntensidad")
+    ?.addEventListener("change", function () {
+      filtrosActivos.intensidad = this.value;
+    });
+
+  // Manejar cambios en capacidad mínima
+  document
+    .getElementById("filtroCapacidadMin")
+    ?.addEventListener("input", function () {
+      filtrosActivos.capacidadMin = this.value ? parseInt(this.value) : 0;
+    });
+
+  // Manejar cambios en los checkboxes de estado
+  document.querySelectorAll(".filtroEstado").forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      actualizarFiltrosEstado();
+    });
+  });
+
+  // Cambios en el filtro de parque
+  document
+    .getElementById("filtroParque")
+    ?.addEventListener("change", function () {
+      filtrosActivos.parque = this.value;
+    });
+
+  // Botón para aplicar filtros
+  document
+    .getElementById("btnAplicarFiltros")
+    ?.addEventListener("click", aplicarFiltros);
+
+  // Botón para limpiar filtros
+  document
+    .getElementById("btnLimpiarFiltros")
+    ?.addEventListener("click", limpiarFiltros);
+}
+
+// Actualizar el array de estados seleccionados
+function actualizarFiltrosEstado() {
+  const estadosSeleccionados = [];
+  document.querySelectorAll(".filtroEstado:checked").forEach((checkbox) => {
+    estadosSeleccionados.push(checkbox.value);
+  });
+  filtrosActivos.estados = estadosSeleccionados;
+}
+
+// Función para poblar el selector de parques dinámicamente
+function poblarSelectorParques() {
+  const selectorParque = document.getElementById("filtroParque");
+  if (!selectorParque) return;
+
+  // Conjunto para almacenar nombres únicos de parques
+  const nombresParques = new Set();
+
+  // Obtener nombres de parques de las atracciones
+  todasLasAtracciones.forEach((atraccion) => {
+    if (atraccion.properties && atraccion.properties.nombre_parque) {
+      nombresParques.add(atraccion.properties.nombre_parque);
+    }
+  });
+
+  // Agregar opciones al selector
+  nombresParques.forEach((nombre) => {
+    const option = document.createElement("option");
+    option.value = nombre;
+    option.textContent = nombre;
+    selectorParque.appendChild(option);
+  });
+}
+
+// Función para aplicar filtros
+function aplicarFiltros() {
+  if (todasLasAtracciones.length === 0) {
+    alert("No hay atracciones para filtrar.");
+    return;
+  }
+
+  // Filtrar las atracciones
+  const atraccionesFiltradas = todasLasAtracciones.filter((atraccion) => {
+    const props = atraccion.properties;
+
+    // Verificar todos los criterios de filtrado
+    if (filtrosActivos.tipo && props.tipo !== filtrosActivos.tipo) return false;
+    if (
+      filtrosActivos.intensidad &&
+      props.intensidad !== filtrosActivos.intensidad
+    )
+      return false;
+    if (
+      filtrosActivos.capacidadMin > 0 &&
+      props.capacidad_personas < filtrosActivos.capacidadMin
+    )
+      return false;
+    if (
+      filtrosActivos.alturaMinima > 0 &&
+      props.altura_minima < filtrosActivos.alturaMinima
+    )
+      return false;
+    if (!filtrosActivos.estados.includes(props.estado)) return false;
+    if (filtrosActivos.parque && props.nombre_parque !== filtrosActivos.parque)
+      return false;
+
+    return true;
+  });
+
+  // Actualizar visualización
+  actualizarVisualizacionAtracciones(atraccionesFiltradas);
+
+  // Actualizar contador de resultados
+  // document.getElementById(
+  //   "resultadosFiltro"
+  // ).textContent = `${atraccionesFiltradas.length} de ${todasLasAtracciones.length} atracciones`;
+}
+
+// Función para limpiar todos los filtros
+function limpiarFiltros() {
+  // Restablecer valores de los controles de filtro
+  document.getElementById("filtroTipo").value = "";
+  document.getElementById("filtroIntensidad").value = "";
+  document.getElementById("filtroCapacidadMin").value = "";
+  document.getElementById("filtroAlturaSlider").value = 0;
+  document.getElementById("alturaValor").textContent = "0 cm";
+  document.getElementById("filtroParque").value = "";
+
+  // Marcar todos los checkboxes de estado
+  document.querySelectorAll(".filtroEstado").forEach((checkbox) => {
+    checkbox.checked = true;
+  });
+
+  // Restablecer objeto de filtros
+  filtrosActivos = {
+    tipo: "",
+    intensidad: "",
+    capacidadMin: 0,
+    alturaMinima: 0,
+    estados: ["Operativa", "Mantenimiento", "Cerrada temporalmente"],
+    parque: "",
+  };
+
+  // Mostrar todas las atracciones
+  actualizarVisualizacionAtracciones(todasLasAtracciones);
+  document.getElementById("resultadosFiltro").textContent =
+    "Todas las atracciones";
+}
+
+// Función para actualizar la visualización de atracciones en el mapa y lista
+function actualizarVisualizacionAtracciones(atracciones) {
+  // Limpiar capas existentes
+  atraccionesLayer.clearLayers();
+
+  // Crear lista para el sidebar
+  const pointsList = document.getElementById("pointsList");
+  pointsList.innerHTML = ""; // Limpiar lista existente
+
+  // Iconos por tipo de atracción
+  const iconos = {
+    "Montaña rusa": "fa-rocket",
+    Acuática: "fa-water",
+    Familiar: "fa-users",
+    Espectáculo: "fa-theater-masks",
+    Extrema: "fa-bolt",
+    default: "fa-star",
+  };
+
+  // Colores por intensidad
+  const colores = {
+    Baja: "#4ade80", // verde
+    Media: "#fbbf24", // amarillo
+    Alta: "#ef4444", // rojo
+    default: "#8b5cf6", // morado
+  };
+
+  // Agregar cada atracción filtrada al mapa
+  atracciones.forEach((feature) => {
+    const atraccion = feature.properties;
+    const geom = feature.geometry;
+
+    // Determinar icono y color
+    const iconClass = iconos[atraccion.tipo] || iconos["default"];
+    const color = colores[atraccion.intensidad] || colores["default"];
+
+    // Crear marcador personalizado
+    const iconHtml = `<i class="fas ${iconClass}" style="color: ${color};"></i>`;
+    const customIcon = L.divIcon({
+      html: iconHtml,
+      className: "custom-div-icon",
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+
+    // Crear marcador y agregarlo al mapa
+    const marker = L.marker([geom.coordinates[1], geom.coordinates[0]], {
+      icon: customIcon,
+    }).addTo(atraccionesLayer);
+
+    // Agregar popup con información
+    marker.bindPopup(`
+            <div class="popup-content">
+                <h3>${atraccion.nombre}</h3>
+                <p><strong>Tipo:</strong> ${atraccion.tipo}</p>
+                <p><strong>Intensidad:</strong> ${atraccion.intensidad}</p>
+                <p><strong>Altura mínima:</strong> ${atraccion.altura_minima} cm</p>
+                <p><strong>Capacidad:</strong> ${atraccion.capacidad_personas} personas</p>
+                <p><strong>Duración:</strong> ${atraccion.duracion_minutos} minutos</p>
+                <p><strong>Fabricante:</strong> ${atraccion.fabricante}</p>
+                <p><strong>Estado:</strong> ${atraccion.estado}</p>
+                <p><strong>Parque:</strong> ${atraccion.nombre_parque}</p>
+            </div>
+        `);
+
+    // Agregar elemento a la lista del sidebar
+    const listItem = document.createElement("li");
+    listItem.className = "point-item";
+    listItem.innerHTML = `
+            <div class="point-icon"><i class="fas ${iconClass}" style="color: ${color};"></i></div>
+            <div class="point-item-content">
+                <div class="point-name">${atraccion.nombre}</div>
+                <div class="point-type">${atraccion.tipo} - ${atraccion.intensidad}</div>
+            </div>
+            <div class="remove-btn">×</div>
+        `;
+    pointsList.appendChild(listItem);
+
+    // Manejar evento de clic en botón de eliminar
+    const removeBtn = listItem.querySelector(".remove-btn");
+    removeBtn.addEventListener("click", function () {
+      map.removeLayer(marker);
+      pointsList.removeChild(listItem);
+    });
+
+    // Manejar evento de clic en el elemento de lista
+    listItem.addEventListener("click", function () {
+      // Deseleccionar elementos previos en la UI
+      document
+        .querySelectorAll(".point-item")
+        .forEach((i) => i.classList.remove("selected"));
+      this.classList.add("selected");
+
+      // Centrar el mapa en esta atracción
+      map.setView([geom.coordinates[1], geom.coordinates[0]], 18);
+      marker.openPopup();
+    });
+  });
+
+  // Asegurar que la capa esté en el mapa
+  atraccionesLayer.addTo(map);
+
+  // Si hay atracciones filtradas, ajustar vista para mostrarlas todas
+  if (atracciones.length > 0) {
+    const bounds = atraccionesLayer.getBounds();
+    if (bounds.isValid()) {
+      map.fitBounds(bounds);
+    }
+  }
+}
+
+// Modificar la función cargarAtracciones para incluir el filtrado
+function cargarAtracciones() {
+  fetch("http://localhost:3000/atracciones")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Datos de atracciones recibidos:", data);
+
+      // Guardar todas las atracciones para filtrado
+      todasLasAtracciones = data.features;
+
+      // Poblar el selector de parques
+      poblarSelectorParques();
+
+      // Mostrar todas las atracciones inicialmente
+      actualizarVisualizacionAtracciones(todasLasAtracciones);
+    })
+    .catch((error) => {
+      console.error("Error al cargar las atracciones:", error);
+      alert(
+        "Error al cargar los datos de atracciones. Por favor, verifica la conexión con el servidor."
+      );
+    });
+}
+
+// Inicializar filtros cuando se carga la página
+document.addEventListener("DOMContentLoaded", () => {
+  inicializarFiltros();
+});

@@ -52,7 +52,56 @@
             </div>
           </div>
         </div>
+
         <div class="sidebar-content" id="atraccionesContent">
+          <div class="filter-section">
+            <div class="filter-header">
+              <span>Filtrar atracciones</span>
+              <!-- <button id="btnLimpiarFiltros" class="small-btn">Limpiar</button> -->
+            </div>
+            <div class="filter-group">
+              <label>Altura mínima (cm):</label>
+              <div class="range-filter">
+                <input
+                  type="range"
+                  id="filtroAlturaSlider"
+                  min="0"
+                  max="150"
+                  step="10"
+                  value="0"
+                />
+                <span id="alturaValor">0 cm</span>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label>Intensidad:</label>
+              <select id="filtroIntensidad" class="filter-select">
+                <option value="">Todas</option>
+                <option value="Moderada">Moderada</option>
+                <option value="Alta">Alta</option>
+                <option value="Extrema">Extrema</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Capacidad mínima:</label>
+              <input
+                type="number"
+                id="filtroCapacidadMin"
+                min="0"
+                step="1"
+                placeholder="Min"
+              />
+            </div>
+
+            <button id="btnAplicarFiltros" class="operation-btn">
+              Aplicar Filtros
+            </button>
+            <div id="resultadosFiltro" class="result-box">
+              Todas las atracciones
+            </div>
+          </div>
           <div class="sidebar-title">Atracciones Populares</div>
 
           <ul id="pointsList">
